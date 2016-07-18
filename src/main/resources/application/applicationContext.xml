@@ -9,11 +9,12 @@
 
     <!-- enable Spring annotations processing -->
     <context:annotation-config/>
-    
-    <!-- IT CONFIG -->
-    <context:property-placeholder/>
+
+    <context:property-placeholder location="classpath*:/config/datasource.properties"/>
 
     <!-- Application -->
     <bean class="pl.edux.pjwstk.it.platform.test.jdbc.pool.Simulation" />
     <import resource="classpath:/application/dbcp1/dbcp1DataSource.xml"/>
+    <!--<import resource="classpath:/application/dbcp2/dbcp2DataSource.xml"/>-->
+    <!--<import resource="classpath:/application/hikari/hikariDataSource.xml"/>-->
 </beans>
