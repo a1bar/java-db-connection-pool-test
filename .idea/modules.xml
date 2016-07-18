@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/java-db-connnection-pool-test.iml" filepath="$PROJECT_DIR$/java-db-connnection-pool-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/itp-java-db-connnection-pool-test.iml" filepath="$PROJECT_DIR$/itp-java-db-connnection-pool-test.iml" />
     </modules>
   </component>
 </project>

@@ -4,12 +4,8 @@
     <facet type="Spring" name="Spring">
       <configuration>
         <fileset id="fileset" name="Spring Application Context" removed="false">
-          <file>file://$MODULE_DIR$/src/main/resources/application/bonecp/applicationContext-bonecp.xml</file>
-          <file>file://$MODULE_DIR$/src/main/resources/application/dbcp1/applicationContext-dbcp1.xml</file>
-          <file>file://$MODULE_DIR$/src/main/resources/application/dbcp2/applicationContext-dbcp2.xml</file>
-          <file>file://$MODULE_DIR$/src/main/resources/application/hikari/applicationContext-hikari.xml</file>
           <file>file://$MODULE_DIR$/src/main/resources/application/init.xml</file>
-          <file>file://$MODULE_DIR$/src/main/java/pl/edux/pjwstk/it/platform/test/jdbc/pool/HikariCpPoolConfiguration.java</file>
+          <file>file://$MODULE_DIR$/src/main/resources/application/init.xml</file>
         </fileset>
       </configuration>
     </facet>
