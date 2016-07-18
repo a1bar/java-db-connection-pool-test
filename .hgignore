@@ -1,0 +1,13 @@
+syntax: regexp
+\.DS_Store$
+# eclipse and maven stuff
+\.classpath$
+\.project$
+\.settings/
+target
+#Idea stuff
+^\.idea
+\.iml$
+indexer/deplApps.xml
+service/src/main/webapp/application.html
+bin

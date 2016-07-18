@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!--<jms:config javaOptions="-server -Xmx64m" jmxPort="7654" />TODO-->
+
+    <bean id="bonecpDataSource" class="com.jolbox.bonecp.BoneCPDataSource"
+		destroy-method="close" lazy-init="false">
+		<property name="driverClass" value="oracle.jdbc.OracleDriver" />
+		<property name="jdbcUrl" value="${datasource.test.common > urls}" />
+		<property name="username" value="${datasource.test.common > username}" />
+		<property name="password" value="${datasource.test.common > password}" />
+		<property name="partitionCount" value="1"/>
+		<property name="maxConnectionsPerPartition" value="${datasource.test.common > maxPoolSize}" />
+		<property name="minConnectionsPerPartition" value="${datasource.test.common > maxPoolSize}" />
+		<property name="connectionTimeoutInMs" value="${datasource.test.common > getConnectionTimeout}"/>
+		<property name="closeConnectionWatchTimeoutInMs" value="10000"/>
+		<property name="statisticsEnabled" value="true"/>
+	</bean>
+
+</beans>

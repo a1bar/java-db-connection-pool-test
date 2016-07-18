@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:si="http://www.springframework.org/schema/integration"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:sap="http://www.swissquote.com/schema/app-platform"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/util
+                http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                http://www.swissquote.com/schema/app-platform                 
+				http://www.swissquote.com/schema/app-platform/sq-app-platform-1.0.xsd
+                http://www.springframework.org/schema/context 
+				http://www.springframework.org/schema/context/spring-context.xsd
+				http://www.springframework.org/schema/util 
+				http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<sap:config javaOptions="-server -Xmx64m" jmxPort="7654" />
+	
+	<bean id="configurationBuilder" class="com.vladmihalcea.flexypool.config.Configuration$Builder">
+		<constructor-arg value="tomcatPoolConfigBuilder" />
+		<constructor-arg ref="tomcatDataSource" />
+		<constructor-arg value="#{ T(com.vladmihalcea.flexypool.adaptor.TomcatCPPoolAdapter).FACTORY }" />
+	</bean>
+
+	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+		destroy-method="close" autowire-candidate="false">
+		<property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+		<property name="url" value="${datasource.test.common > urls}" />
+		<property name="username" value="${datasource.test.common > username}" />
+		<property name="password" value="${datasource.test.common > password}" />
+		<property name="maxWait" value="${datasource.test.common > getConnectionTimeout}" />
+		<property name="initialSize" value="5" />
+		<property name="maxActive" value="10" />
+		<property name="maxIdle" value="5" />
+		<property name="minIdle" value="2" />
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="10" />
+		<property name="logAbandoned" value="true" />
+		<property name="validationQuery" value="SELECT 1 FROM DUAL" />
+		<property name="testOnBorrow" value="true" />
+		<property name="jmxEnabled" value="true" />
+	</bean>
+
+	<bean id="configuration" factory-bean="configurationBuilder" factory-method="build" />
+
+	<bean id="flexyDataSource" class="com.vladmihalcea.flexypool.FlexyPoolDataSource" init-method="start" destroy-method="stop">
+		<constructor-arg ref="configuration" />
+		<constructor-arg>
+			<array>
+				<bean
+					class="com.swissquote.it.platform.test.jdbc.pool.LimitWaitingThreadsStrategy.Factory">
+					<constructor-arg value="300"/>	
+				</bean> 
+			</array>
+		</constructor-arg>
+	</bean>
+
+
+</beans>

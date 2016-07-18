@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:si="http://www.springframework.org/schema/integration"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:sap="http://www.swissquote.com/schema/app-platform"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/util
+                http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                http://www.swissquote.com/schema/app-platform                 
+				http://www.swissquote.com/schema/app-platform/sq-app-platform-1.0.xsd
+                http://www.springframework.org/schema/context 
+				http://www.springframework.org/schema/context/spring-context.xsd
+				http://www.springframework.org/schema/util 
+				http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<sap:config javaOptions="-server -Xmx64m" jmxPort="7654" />
+	
+	<bean id="configurationBuilder" class="com.vladmihalcea.flexypool.config.Configuration$Builder">
+		<constructor-arg value="dbcp2PoolConfigBuilder" />
+		<constructor-arg ref="dbcp2DataSource" />
+		<constructor-arg value="#{ T(com.vladmihalcea.flexypool.adaptor.DBCP2PoolAdapter).FACTORY }" />
+	</bean>
+
+	<bean id="dbcp2DataSource" class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close" autowire-candidate="false" lazy-init="false">
+		<property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+		<property name="url" value="${datasource.test.common > urls}" />
+		<property name="username" value="${datasource.test.common > username}" />
+		<property name="password" value="${datasource.test.common > password}" />
+		<property name="initialSize" value="${datasource.test.common > maxPoolSize}" />
+		<property name="maxTotal" value="${datasource.test.common > maxPoolSize}"/>
+		<property name="maxWaitMillis" value="${datasource.test.common > getConnectionTimeout}"/>
+		<property name="removeAbandonedOnBorrow" value="true"/>
+		<property name="removeAbandonedTimeout" value="10"/>
+		<property name="logAbandoned" value="true"/>
+	</bean>
+
+	<bean id="configuration" factory-bean="configurationBuilder" factory-method="build" />
+
+	<bean id="flexyDataSource" class="com.vladmihalcea.flexypool.FlexyPoolDataSource" init-method="start" destroy-method="stop">
+		<constructor-arg ref="configuration" />
+		<constructor-arg>
+			<array>
+				<bean
+					class="com.vladmihalcea.flexypool.strategy.IncrementPoolOnTimeoutConnectionAcquiringStrategy.Factory">
+					<constructor-arg value="5" />
+				</bean>
+				<bean
+					class="com.vladmihalcea.flexypool.strategy.RetryConnectionAcquiringStrategy.Factory">
+					<constructor-arg value="2" />
+				</bean>
+			</array>
+		</constructor-arg>
+	</bean>
+
+
+</beans>
