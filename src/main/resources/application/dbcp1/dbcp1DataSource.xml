@@ -15,7 +15,7 @@
 		<property name="password" value="${datasource.password}" />
 		<property name="initialSize" value="${datasource.initialSize}" />
 		<property name="maxActive" value="${datasource.maxPoolSize}"/>
-		<property name="maxWait" value="${datasource.getConnectionTimeout}"/>
+		<property name="maxWait" value="${datasource.connectionTimeout}"/>
 	</bean>
 
 </beans>

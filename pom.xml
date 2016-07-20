@@ -66,8 +66,6 @@
 			<artifactId>flexy-dbcp2</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		
-
 
 		<!-- For simulation purposes -->
 		<dependency>
@@ -77,11 +75,6 @@
 		</dependency>
 
 		<!-- for spring JavaConfig -->
-		<dependency>
-		    <groupId>cglib</groupId>
-		    <artifactId>cglib-nodep</artifactId>
-		    <version>2.2</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
@@ -93,6 +86,16 @@
 			<version>3.1.0.RELEASE</version>
 		</dependency>
 
+		<!-- Logging configuration -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.5</version>
+		</dependency>
 	</dependencies>
-
 </project>

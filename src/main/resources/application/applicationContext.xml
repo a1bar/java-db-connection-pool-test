@@ -13,7 +13,8 @@
     <context:property-placeholder location="classpath*:/config/datasource.properties"/>
 
     <!-- Application -->
-    <bean class="pl.edux.pjwstk.it.platform.test.jdbc.pool.Simulation" />
+    <bean class="pl.edux.pjwstk.it.platform.test.jdbc.pool.Simulation"/>
+    <bean class="pl.edux.pjwstk.it.platform.test.jdbc.pool.config.SimulationConfigImpl"/>
     <import resource="classpath:/application/dbcp1/dbcp1DataSource.xml"/>
     <!--<import resource="classpath:/application/dbcp2/dbcp2DataSource.xml"/>-->
     <!--<import resource="classpath:/application/hikari/hikariDataSource.xml"/>-->

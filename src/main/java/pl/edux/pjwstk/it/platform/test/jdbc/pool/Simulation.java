@@ -1,6 +1,7 @@
 package pl.edux.pjwstk.it.platform.test.jdbc.pool;
 
 import java.lang.management.ManagementFactory;
+import java.nio.file.Paths;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,12 +10,12 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import javax.annotation.PostConstruct;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.sql.DataSource;
 
 import pl.edux.pjwstk.it.platform.test.jdbc.pool.config.SimulationConfig;
-import pl.edux.pjwstk.it.platform.test.jdbc.pool.config.SimulationConfigImpl;
 import pl.edux.pjwstk.it.platform.test.jdbc.pool.config.SimulationConfigListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ import org.uncommons.maths.random.ExponentialGenerator;
 // ie : docker run -d -p 1521:1521 wnameless/oracle-xe-11g
 public class Simulation implements InitializingBean, SimulationMBean, SimulationConfigListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(Simulation.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Simulation.class);
 
 	private static final int MAX_THREADS = 400;
 
@@ -37,7 +38,16 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 	@Autowired
 	private DataSource connectionPool;
 
-	private SimulationConfig config = new SimulationConfigImpl();
+	private final String configPropertiesFile = "/config/app.simulation.properties";
+
+	@Autowired
+	private SimulationConfig simulationConfig;
+
+
+	@PostConstruct
+	private void postConstruct(){
+		this.simulationConfig.setPropertiesPath(Paths.get(configPropertiesFile));
+	}
 
 	// for Poisson distribution simulation
 	private NumberGenerator<Double> mean;
@@ -54,22 +64,22 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 	public void afterPropertiesSet() throws Exception {
 		mean = new NumberGenerator<Double>() {
 			public Double nextValue() {
-				return config.readProperty("app.simulation", "requestsPerSecond", Double.class);
+				return simulationConfig.readProperty("requestsPerSecond", Double.class);
 			}
 		};
 		expGen = new ExponentialGenerator(mean, new Random());
-		config.registerConfigurationChangesListener("app.simulation", this);
+		simulationConfig.registerConfigurationChangesListener(configPropertiesFile, this);
 		registerMbean();
 		start();
 	}
 
 	private void start() {
-		logger.info("Starting simulation...");
+		LOG.info("Starting simulation...");
 
 		executor = new ScheduledThreadPoolExecutor(MAX_THREADS, new RejectedExecutionHandler() {
 
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-				logger.error("Thread limit exceeded.");
+				LOG.error("Thread limit exceeded.");
 			}
 		});
 
@@ -85,7 +95,7 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 					synchronized (Simulation.class) {
 						successDelta = successfulRequests - lastSuccess;
 						failedDelta = failedRequests - lastFailed;
-						logger.info("Succes : " + String.format(NUMBER_FORMAT, successfulRequests) + " ("
+						LOG.info("Succes : " + String.format(NUMBER_FORMAT, successfulRequests) + " ("
 								+ String.format(DELTA_FORMAT, successDelta) + ") | Failed : " + String.format(NUMBER_FORMAT, failedRequests)
 								+ " (" + String.format(DELTA_FORMAT, failedDelta) + ") | Queued : "
 								+ String.format("%5d", executor.getQueue().size()) + " | Active : "
@@ -94,15 +104,15 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 						lastSuccess = successfulRequests;
 						lastFailed = failedRequests;
 						if (lastException != null) {
-							logger.warn("Last Exception : " + lastException);
+							LOG.warn("Last Exception : " + lastException);
 							lastException = null;
 						}
 					}
 					try {
-						Thread.sleep(config.readProperty("app.simulation", "logIntervalSeconds", Integer.class) * 1000);
+						Thread.sleep(simulationConfig.readProperty("logIntervalSeconds", Integer.class) * 1000);
 					}
 					catch (InterruptedException e) {
-						logger.info("Thread interrupted, stopping periodic logging...");
+						LOG.info("Thread interrupted, stopping periodic logging...");
 					}
 				}
 			}
@@ -114,36 +124,36 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 
 		// generate DB queries
 		while (!Thread.interrupted()) {
-			deviation = rand.nextGaussian() * config.readProperty("app.simulation", "responseTimeStandardDeviation", Double.class);
-			responseTime = config.readProperty("app.simulation", "responseTimeAverage", Double.class) + deviation;
+			deviation = rand.nextGaussian() * simulationConfig.readProperty("responseTimeStandardDeviation", Double.class);
+			responseTime = simulationConfig.readProperty("responseTimeAverage", Double.class) + deviation;
 			// take out possible extreme values
 			if (responseTime < 0.00001 || responseTime > 10) {
-				responseTime = config.readProperty("app.simulation", "responseTimeAverage", Double.class);
+				responseTime = simulationConfig.readProperty("responseTimeAverage", Double.class);
 			}
 
-			if (executor.getQueue().size() < config.readProperty("app.simulation", "dropRequestsTreshold", Integer.class)) {
-				executor.execute(new databaseRequest(responseTime));
+			if (executor.getQueue().size() < simulationConfig.readProperty("dropRequestsTreshold", Integer.class)) {
+				executor.execute(new DatabaseRequest(responseTime));
 			} else {
 				droppedRequests++;
 			}
 
 			double waitTime = expGen.nextValue();
 			try {
-				logger.debug("Waiting " + waitTime + " seconds until next event.");
+				LOG.debug("Waiting " + waitTime + " seconds until next event.");
 				Thread.sleep(Math.round(waitTime * 1000));
 			}
 			catch (InterruptedException e) {
-				logger.info("Simulation thread interrupted, terminating...");
+				LOG.info("Simulation thread interrupted, terminating...");
 				return;
 			}
 		}
 	}
 
-	private class databaseRequest implements Runnable {
+	private class DatabaseRequest implements Runnable {
 
 		double responseTime;
 
-		public databaseRequest(double responseTime) {
+		public DatabaseRequest(double responseTime) {
 			super();
 			this.responseTime = responseTime;
 		}
@@ -153,21 +163,21 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 			Connection conn = null;
 			// request a connection from the pool and perform a DB request
 			try {
-				logger.debug("getting a connection");
+				LOG.debug("getting a connection");
 				conn = connectionPool.getConnection();
 
-				logger.debug("doing request that should take " + responseTime + " seconds");
+				LOG.debug("doing request that should take " + responseTime + " seconds");
 				CallableStatement call = conn.prepareCall("call DBMS_LOCK.SLEEP(?)");
 				call.setDouble(1, responseTime);
 				call.execute();
 				call.close();
 				successfulRequests++;
-				logger.debug("requests done : " + successfulRequests);
+				LOG.debug("requests done : " + successfulRequests);
 			}
 			catch (SQLException e) {
 				failedRequests++;
 				lastException = e.getMessage();
-				logger.debug("SQL EXCEPTION : ", e);
+				LOG.debug("SQL EXCEPTION : ", e);
 			}
 			finally {
 				if (conn != null) {
@@ -175,8 +185,8 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 						conn.close();
 					}
 					catch (Exception ignore) {
-						logger.info("Exception while closing db connection in final block");
-						logger.info(ignore.getMessage());
+						LOG.info("Exception while closing db connection in final block");
+						LOG.info(ignore.getMessage());
 					}
 				}
 			}
@@ -184,14 +194,14 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 	}
 
 	public void onAppConfigUpdated() {
-		int threadPoolSize = config.readProperty("app.simulation", "executorThreadPoolCoreSize", Integer.class);
+		int threadPoolSize = simulationConfig.readProperty("executorThreadPoolCoreSize", Integer.class);
 		if (executor.getCorePoolSize() != threadPoolSize) {
 			executor.setCorePoolSize(threadPoolSize);
 		}
 	}
 
 	public void leakConnection() {
-		logger.info("leaking a connection");
+		LOG.info("leaking a connection");
 		executor.execute(new Runnable() {
 
 			public void run() {
@@ -202,10 +212,10 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 					Thread.sleep(10 * 60 * 60 * 1000);
 				}
 				catch (SQLException e) {
-					logger.info("Leaked connection received SQLException");
+					LOG.info("Leaked connection received SQLException");
 				}
 				catch (InterruptedException e) {
-					logger.info("Leaked connection thread interrupted");
+					LOG.info("Leaked connection thread interrupted");
 				}
 				leakedConnections--;
 			}
