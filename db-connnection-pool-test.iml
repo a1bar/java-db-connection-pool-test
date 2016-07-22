@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Spring" name="Spring">
+      <configuration>
+        <fileset id="fileset" name="Spring Application Context" removed="false" profiles="dbcp2,dbcp1,bonecp,hikari">
+          <file>file://$MODULE_DIR$/src/main/resources/application/applicationContext.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/application/bonecp/bonecpDataSource.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/application/dbcp1/dbcp1DataSource.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/application/dbcp2/dbcp2DataSource.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/application/hikari/hikariDataSource.xml</file>
+          <file>file://$MODULE_DIR$/src/main/java/pl/edu/pja/master/s12621/HikariCpPoolConfiguration.java</file>
+        </fileset>
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />

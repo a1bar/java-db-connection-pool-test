@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * Created by bartosz.drabik
  */
+
 public class Simulation implements InitializingBean, SimulationMBean {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Simulation.class);
@@ -69,7 +70,7 @@ public class Simulation implements InitializingBean, SimulationMBean {
 	}
 
 	private void start() {
-		LOG.info("Starting simulation..."+connectionPool.getClass());
+		LOG.info(String.format("Starting simulation with%s Data Source", connectionPool.getClass()));
 
 		executor = new ScheduledThreadPoolExecutor(simulationConfig.readProperty("executorThreadPoolCoreSize", Integer.class), new RejectedExecutionHandler() {
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
