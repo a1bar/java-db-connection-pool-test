@@ -1,11 +1,11 @@
-package pl.edux.pjwstk.it.platform.test.jdbc.pool.config;
+package pl.edu.pja.master.s12621.config;
 
-import pl.edux.pjwstk.it.platform.test.jdbc.pool.Simulation;
+import pl.edu.pja.master.s12621.Simulation;
 
 import java.nio.file.Path;
 
 /**
- * Created by admin on 08/02/16.
+ * Created by bartosz.drabik
  */
 public interface SimulationConfig {
 

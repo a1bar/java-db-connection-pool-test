@@ -1,18 +1,17 @@
-package pl.edux.pjwstk.it.platform.test.jdbc.pool.config;
+package pl.edu.pja.master.s12621.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import pl.edux.pjwstk.it.platform.test.jdbc.pool.Simulation;
-import pl.edux.pjwstk.it.platform.test.jdbc.pool.utils.ObjectConverter;
+import pl.edu.pja.master.s12621.Simulation;
+import pl.edu.pja.master.s12621.utils.ObjectConverter;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
 /**
- * Created by admin on 08/02/16.
+ * Created by bartosz.drabik
  */
 @Component
 public class SimulationConfigImpl implements SimulationConfig {

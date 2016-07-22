@@ -1,38 +1,32 @@
-package pl.edux.pjwstk.it.platform.test.jdbc.pool;
+package pl.edu.pja.master.s12621;
 
-import java.util.Properties;
-
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
+/**
+ * Created by bartosz.drabik
+ */
 @Configuration
 public class HikariCpPoolConfiguration {
 
-	@Value("${datasource.test.common > maxPoolSize}")
+	@Value("${datasource.maxPoolSize}")
 	public int maxPoolSize;
 
-	@Value("${datasource.test.common > urls}")
+	@Value("${datasource.url}")
 	public String url;
 
-	@Value("${datasource.test.common > username}")
+	@Value("${datasource.username}")
 	public String username;
 
-	@Value("${datasource.test.common > password}")
+	@Value("${datasource.password}")
 	public String password;
 
-	@Value("${datasource.test.common > getConnectionTimeout}")
+	@Value("${datasource.connectionTimeout}")
 	public long connectionTimeout;
-
-	public Properties getConnectionProperties() {
-		Properties props = new Properties();
-		//props.setProperty("oracle.jdbc.ReadTimeout", "1000");
-		//props.put("oracle.net.CONNECT_TIMEOUT", 1001);
-		return props;
-	}
 
 	public HikariConfig getHikariConfig() {
 		HikariConfig config = new HikariConfig();
@@ -43,15 +37,10 @@ public class HikariCpPoolConfiguration {
 		config.setConnectionTimeout(connectionTimeout);
 		config.setConnectionTestQuery("SELECT 1 from dual");
 		config.setInitializationFailFast(true);
-		config.setLeakDetectionThreshold(10000);
 		config.setRegisterMbeans(true);
-		config.addDataSourceProperty("connectionProperties", getConnectionProperties());
-		//config.addDataSourceProperty(OracleConnection.CONNECTION_PROPERTY_THIN_NET_CONNECT_TIMEOUT, 1001);
 		config.addDataSourceProperty("url", url);
 		config.addDataSourceProperty("user", username);
 		config.addDataSourceProperty("password", password);
-		config.addDataSourceProperty("loginTimeout", "1000");
-
 		return config;
 	}
 

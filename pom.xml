@@ -2,11 +2,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>itp-java-db-connnection-pool-test</artifactId>
+	<artifactId>db-connnection-pool-test</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<groupId>pl.edu.pjwstk</groupId>
 
-	<name>IT Platform :: POC :: Java Database Connection Pools</name>
+	<name>Master project :: s12621 :: Database Connection Pools Test</name>
 
 	<properties>
 		<uncommons-math.version>1.2.2a</uncommons-math.version>
@@ -84,6 +84,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>3.1.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.2</version>
 		</dependency>
 
 		<!-- Logging configuration -->

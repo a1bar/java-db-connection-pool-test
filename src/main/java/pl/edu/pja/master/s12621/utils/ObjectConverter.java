@@ -1,4 +1,4 @@
-package pl.edux.pjwstk.it.platform.test.jdbc.pool.utils;
+package pl.edu.pja.master.s12621.utils;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -12,35 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Generic object converter. <p> <h3>Use examples</h3>
- *
- * <pre>
- * Object o1 = Boolean.TRUE;
- * Integer i = ObjectConverter.convert(o1, Integer.class);
- * System.out.println(i); // 1
- *
- * Object o2 = "false";
- * Boolean b = ObjectConverter.convert(o2, Boolean.class);
- * System.out.println(b); // false
- *
- * Object o3 = new Integer(123);
- * String s = ObjectConverter.convert(o3, String.class);
- * System.out.println(s); // 123
- * </pre>
- *
- * Not all possible conversions are implemented. You can extend the
- * <tt>ObjectConverter</tt> easily by just adding a new method to it, with the
- * appropriate logic. For example:
- *
- * <pre>
- * public static ToObject fromObjectToObject(FromObject fromObject) {
- *     // Implement.
- * }
- * </pre>
- *
- * The method name doesn't matter. It's all about the parameter type and the
- * return type.
- *
+ * Created by bartosz.drabik
  */
 public final class ObjectConverter {
 

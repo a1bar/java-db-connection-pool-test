@@ -1,5 +1,8 @@
-package pl.edux.pjwstk.it.platform.test.jdbc.pool;
+package pl.edu.pja.master.s12621;
 
+/**
+ * Created by bartosz.drabik
+ */
 public interface SimulationMBean {
 
 	void leakConnection();

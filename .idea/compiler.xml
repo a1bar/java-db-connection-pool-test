@@ -22,10 +22,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="db-connnection-pool-test" />
         <module name="itp-java-db-connnection-pool-test" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="db-connnection-pool-test" target="1.5" />
       <module name="itp-java-db-connnection-pool-test" target="1.5" />
     </bytecodeTargetLevel>
   </component>

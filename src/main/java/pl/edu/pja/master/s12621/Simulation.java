@@ -1,5 +1,17 @@
-package pl.edux.pjwstk.it.platform.test.jdbc.pool;
+package pl.edu.pja.master.s12621;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.uncommons.maths.number.NumberGenerator;
+import org.uncommons.maths.random.ExponentialGenerator;
+import pl.edu.pja.master.s12621.config.SimulationConfig;
+
+import javax.annotation.PostConstruct;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.sql.DataSource;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.sql.CallableStatement;
@@ -10,27 +22,12 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.annotation.PostConstruct;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.sql.DataSource;
-
-import pl.edux.pjwstk.it.platform.test.jdbc.pool.config.SimulationConfig;
-import pl.edux.pjwstk.it.platform.test.jdbc.pool.config.SimulationConfigListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.uncommons.maths.number.NumberGenerator;
-import org.uncommons.maths.random.ExponentialGenerator;
-
-// this simulation requires a running oracle database
-// ie : docker run -d -p 1521:1521 wnameless/oracle-xe-11g
-public class Simulation implements InitializingBean, SimulationMBean, SimulationConfigListener {
+/**
+ * Created by bartosz.drabik
+ */
+public class Simulation implements InitializingBean, SimulationMBean {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Simulation.class);
-
-	private static final int MAX_THREADS = 400;
 
 	private static final String NUMBER_FORMAT = "%6d";
 	private static final String DELTA_FORMAT = "%+4d";
@@ -49,8 +46,6 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 		this.simulationConfig.setPropertiesPath(Paths.get(configPropertiesFile));
 	}
 
-	// for Poisson distribution simulation
-	private NumberGenerator<Double> mean;
 	private ExponentialGenerator expGen;
 
 	private ScheduledThreadPoolExecutor executor;
@@ -62,7 +57,7 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 	private String lastException;
 
 	public void afterPropertiesSet() throws Exception {
-		mean = new NumberGenerator<Double>() {
+		NumberGenerator<Double> mean = new NumberGenerator<Double>() {
 			public Double nextValue() {
 				return simulationConfig.readProperty("requestsPerSecond", Double.class);
 			}
@@ -74,10 +69,9 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 	}
 
 	private void start() {
-		LOG.info("Starting simulation...");
+		LOG.info("Starting simulation..."+connectionPool.getClass());
 
-		executor = new ScheduledThreadPoolExecutor(MAX_THREADS, new RejectedExecutionHandler() {
-
+		executor = new ScheduledThreadPoolExecutor(simulationConfig.readProperty("executorThreadPoolCoreSize", Integer.class), new RejectedExecutionHandler() {
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
 				LOG.error("Thread limit exceeded.");
 			}
@@ -95,7 +89,7 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 					synchronized (Simulation.class) {
 						successDelta = successfulRequests - lastSuccess;
 						failedDelta = failedRequests - lastFailed;
-						LOG.info("Succes : " + String.format(NUMBER_FORMAT, successfulRequests) + " ("
+						LOG.info("Success : " + String.format(NUMBER_FORMAT, successfulRequests) + " ("
 								+ String.format(DELTA_FORMAT, successDelta) + ") | Failed : " + String.format(NUMBER_FORMAT, failedRequests)
 								+ " (" + String.format(DELTA_FORMAT, failedDelta) + ") | Queued : "
 								+ String.format("%5d", executor.getQueue().size()) + " | Active : "
@@ -131,7 +125,7 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 				responseTime = simulationConfig.readProperty("responseTimeAverage", Double.class);
 			}
 
-			if (executor.getQueue().size() < simulationConfig.readProperty("dropRequestsTreshold", Integer.class)) {
+			if (executor.getQueue().size() < simulationConfig.readProperty("dropRequestsThreshold", Integer.class)) {
 				executor.execute(new DatabaseRequest(responseTime));
 			} else {
 				droppedRequests++;
@@ -151,7 +145,7 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 
 	private class DatabaseRequest implements Runnable {
 
-		double responseTime;
+		final double responseTime;
 
 		public DatabaseRequest(double responseTime) {
 			super();
@@ -163,21 +157,21 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 			Connection conn = null;
 			// request a connection from the pool and perform a DB request
 			try {
-				LOG.debug("getting a connection");
+				LOG.debug("Getting a connection");
 				conn = connectionPool.getConnection();
 
-				LOG.debug("doing request that should take " + responseTime + " seconds");
+				LOG.debug(String.format("Performing a request that should take %s seconds", responseTime));
 				CallableStatement call = conn.prepareCall("call DBMS_LOCK.SLEEP(?)");
 				call.setDouble(1, responseTime);
 				call.execute();
 				call.close();
 				successfulRequests++;
-				LOG.debug("requests done : " + successfulRequests);
+				LOG.debug("Number of successful requests: " + successfulRequests);
 			}
 			catch (SQLException e) {
 				failedRequests++;
 				lastException = e.getMessage();
-				LOG.debug("SQL EXCEPTION : ", e);
+				LOG.error("SQL exception while performing a db request: ", e);
 			}
 			finally {
 				if (conn != null) {
@@ -193,15 +187,8 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 		}
 	}
 
-	public void onAppConfigUpdated() {
-		int threadPoolSize = simulationConfig.readProperty("executorThreadPoolCoreSize", Integer.class);
-		if (executor.getCorePoolSize() != threadPoolSize) {
-			executor.setCorePoolSize(threadPoolSize);
-		}
-	}
-
 	public void leakConnection() {
-		LOG.info("leaking a connection");
+		LOG.info("Simulating leaking a connection");
 		executor.execute(new Runnable() {
 
 			public void run() {
@@ -210,11 +197,9 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 					leakedConnections++;
 					// sleep 10 hours
 					Thread.sleep(10 * 60 * 60 * 1000);
-				}
-				catch (SQLException e) {
-					LOG.info("Leaked connection received SQLException");
-				}
-				catch (InterruptedException e) {
+				} catch (SQLException e) {
+					LOG.info("Leaked connection received SQLException", e);
+				} catch (InterruptedException e) {
 					LOG.info("Leaked connection thread interrupted");
 				}
 				leakedConnections--;
@@ -222,7 +207,7 @@ public class Simulation implements InitializingBean, SimulationMBean, Simulation
 		});
 	}
 
-	public void registerMbean() throws Exception {
+	private void registerMbean() throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		ObjectName name = new ObjectName("pl.edux.pjwstk.it.platform.test.jdbc.pool:type=Simulation");
 		mbs.registerMBean(this, name);

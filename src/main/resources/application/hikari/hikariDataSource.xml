@@ -5,8 +5,6 @@
         http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<!--<jms:config javaOptions="-server -Xmx64m" jmxPort="7654" />TODO-->
-
-    <bean class="pl.edux.pjwstk.it.platform.test.jdbc.pool.HikariCpPoolConfiguration"/>
+    <bean class="pl.edu.pja.master.s12621.HikariCpPoolConfiguration"/>
 
 </beans>
