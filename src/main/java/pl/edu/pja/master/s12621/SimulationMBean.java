@@ -5,8 +5,6 @@ package pl.edu.pja.master.s12621;
  */
 public interface SimulationMBean {
 
-	void leakConnection();
-
 	long getNumSuccess();
 
 	long getNumFailed();
@@ -14,8 +12,6 @@ public interface SimulationMBean {
 	long getNumQueued();
 
 	long getNumDropped();
-
-	long getNumLeaked();
 
 	long getNumActive();
 

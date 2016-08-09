@@ -54,7 +54,6 @@ public class Simulation implements InitializingBean, SimulationMBean {
 	private volatile long successfulRequests = 0;
 	private volatile long failedRequests = 0;
 	private volatile long droppedRequests = 0;
-	private volatile long leakedConnections = 0;
 	private String lastException;
 
 	public void afterPropertiesSet() throws Exception {
@@ -194,29 +193,9 @@ public class Simulation implements InitializingBean, SimulationMBean {
 		}
 	}
 
-	public void leakConnection() {
-		LOG.info("Simulating leaking a connection");
-		executor.execute(new Runnable() {
-
-			public void run() {
-				try {
-					connectionPool.getConnection();
-					leakedConnections++;
-					// sleep 10 hours
-					Thread.sleep(10 * 60 * 60 * 1000);
-				} catch (SQLException e) {
-					LOG.info("Leaked connection received SQLException", e);
-				} catch (InterruptedException e) {
-					LOG.info("Leaked connection thread interrupted");
-				}
-				leakedConnections--;
-			}
-		});
-	}
-
 	private void registerMbean() throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		ObjectName name = new ObjectName("pl.edu.pja.master.s12621.test.jdbc.pool:type=Simulation");
+		ObjectName name = new ObjectName("pl.edu.pja.master.s12621.Simulation:type=Simulation");
 		mbs.registerMBean(this, name);
 	}
 
@@ -234,10 +213,6 @@ public class Simulation implements InitializingBean, SimulationMBean {
 
 	public long getNumDropped() {
 		return droppedRequests;
-	}
-
-	public long getNumLeaked() {
-		return leakedConnections;
 	}
 
 	public long getNumActive() {

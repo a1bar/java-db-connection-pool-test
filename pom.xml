@@ -9,12 +9,12 @@
 	<name>Master project :: s12621 :: Database Connection Pools Test</name>
 
 	<properties>
+		<ojdbc6.driver.version>11.2.0.4</ojdbc6.driver.version>
 		<uncommons-math.version>1.2.2a</uncommons-math.version>
-		<it-config.version>3.0.3</it-config.version>
-		<ojdbc6.driver.version>11.2.0.2.0</ojdbc6.driver.version>
 		<hikariCP.version>2.0.1</hikariCP.version>
 		<commons-dbcp2.version>2.0.1</commons-dbcp2.version>
-		<tomcat-jdbc.version>8.0.14</tomcat-jdbc.version>
+		<commons-dbcp1.version>1.2.1</commons-dbcp1.version>
+		<bonecp.version>0.8.0.RELEASE</bonecp.version>
 	</properties>
 
 	<dependencies>
@@ -27,7 +27,7 @@
 		<dependency>
 		<groupId>com.oracle</groupId>
 		<artifactId>ojdbc6</artifactId>
-		<version>11.2.0.4</version>
+		<version>${ojdbc6.driver.version}</version>
 		</dependency>
 		<!-- Connection pool implementations -->
 		<dependency>
@@ -42,24 +42,19 @@
 			<version>${commons-dbcp2.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.tomcat</groupId>
-		    <artifactId>tomcat-jdbc</artifactId>
-		    <version>${tomcat-jdbc.version}</version>
-		</dependency>
-		<dependency>
 		  <groupId>commons-dbcp</groupId>
 		  <artifactId>commons-dbcp</artifactId>
-		  <version>1.2.1</version>
+		  <version>${commons-dbcp1.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId>
-			<version>1.6</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>commons-pool</groupId>-->
+			<!--<artifactId>commons-pool</artifactId>-->
+			<!--<version>1.6</version>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
-			<version>0.8.0.RELEASE</version>
+			<version>${bonecp.version}</version>
 		</dependency>
 
 		<!-- For simulation purposes -->
