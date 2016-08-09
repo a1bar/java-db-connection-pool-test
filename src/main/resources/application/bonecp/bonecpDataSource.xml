@@ -7,16 +7,13 @@
 
     <bean id="bonecpDataSource" class="com.jolbox.bonecp.BoneCPDataSource"
 		destroy-method="close" lazy-init="false">
-		<property name="driverClass" value="oracle.jdbc.OracleDriver" />
 		<property name="jdbcUrl" value="${datasource.url}" />
 		<property name="username" value="${datasource.username}" />
 		<property name="password" value="${datasource.password}" />
 		<property name="partitionCount" value="1"/>
-		<property name="maxConnectionsPerPartition" value="10"/>	<!--TODO-->
-		<property name="minConnectionsPerPartition" value="5"/>	<!--TODO-->
+		<property name="maxConnectionsPerPartition" value="${datasource.maxPoolSize}"/>
+		<property name="minConnectionsPerPartition" value="${datasource.initialSize}"/>
 		<property name="connectionTimeoutInMs" value="${datasource.connectionTimeout}"/>
-		<property name="closeConnectionWatchTimeoutInMs" value="10000"/>
-		<property name="statisticsEnabled" value="true"/>
 	</bean>
 
 </beans>

@@ -5,6 +5,20 @@
         http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans.xsd" profile="hikari">
 
-    <bean class="pl.edu.pja.master.s12621.HikariCpPoolConfiguration"/>
+	<bean class="com.zaxxer.hikari.HikariDataSource" destroy-method="close" lazy-init="false">
+		<constructor-arg ref="hikariConfig" />
+	</bean>
 
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+		<property name="maximumPoolSize" value="${datasource.maxPoolSize}" />
+		<property name="dataSourceClassName" value="${datasource.dataSourceClassName}"/>
+		<property name="connectionTimeout" value="${datasource.connectionTimeout}"/>
+		<property name="dataSourceProperties">
+			<props>
+				<prop key="url">${datasource.url}</prop>
+				<prop key="user">${datasource.username}</prop>
+				<prop key="password">${datasource.password}</prop>
+			</props>
+		</property>
+	</bean>
 </beans>

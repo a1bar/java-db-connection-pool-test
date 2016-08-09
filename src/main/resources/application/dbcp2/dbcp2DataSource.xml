@@ -14,9 +14,9 @@
 		<property name="initialSize" value="${datasource.initialSize}" />
 		<property name="maxTotal" value="${datasource.maxPoolSize}"/>
 		<property name="maxWaitMillis" value="${datasource.connectionTimeout}"/>
-		<property name="removeAbandonedOnBorrow" value="true"/>
-		<property name="removeAbandonedTimeout" value="10"/>	<!--TODO-->
-		<property name="logAbandoned" value="true"/>
+		<!--<property name="removeAbandonedOnBorrow" value="true"/>-->
+		<!--<property name="removeAbandonedTimeout" value="10"/>	&lt;!&ndash;TODO&ndash;&gt;-->
+		<!--<property name="logAbandoned" value="true"/>-->
 	</bean>
 
 </beans>

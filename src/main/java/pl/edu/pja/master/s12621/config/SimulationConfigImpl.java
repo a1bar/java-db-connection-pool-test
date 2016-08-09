@@ -3,7 +3,6 @@ package pl.edu.pja.master.s12621.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import pl.edu.pja.master.s12621.Simulation;
 import pl.edu.pja.master.s12621.utils.ObjectConverter;
 
 import java.io.IOException;
@@ -39,9 +38,5 @@ public class SimulationConfigImpl implements SimulationConfig {
 
     public <T> T readProperty(String property, Class<T> clazz) {
         return ObjectConverter.convert(properties.getProperty(property),clazz);
-    }
-
-    public void registerConfigurationChangesListener(String s, Simulation simulation) {
-//TODO?
     }
 }

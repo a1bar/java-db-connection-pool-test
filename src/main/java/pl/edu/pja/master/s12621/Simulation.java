@@ -59,18 +59,19 @@ public class Simulation implements InitializingBean, SimulationMBean {
 
 	public void afterPropertiesSet() throws Exception {
 		NumberGenerator<Double> mean = new NumberGenerator<Double>() {
+			final Double requestsPerSecond = simulationConfig.readProperty("requestsPerSecond", Double.class);
+
 			public Double nextValue() {
-				return simulationConfig.readProperty("requestsPerSecond", Double.class);
+				return requestsPerSecond;
 			}
 		};
 		expGen = new ExponentialGenerator(mean, new Random());
-		simulationConfig.registerConfigurationChangesListener(configPropertiesFile, this);
 		registerMbean();
 		start();
 	}
 
 	private void start() {
-		LOG.info(String.format("Starting simulation with%s Data Source", connectionPool.getClass()));
+		LOG.info(String.format("Starting simulation with %s Data Source", connectionPool.getClass()));
 
 		executor = new ScheduledThreadPoolExecutor(simulationConfig.readProperty("executorThreadPoolCoreSize", Integer.class), new RejectedExecutionHandler() {
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
@@ -83,21 +84,24 @@ public class Simulation implements InitializingBean, SimulationMBean {
 
 			public void run() {
 				long lastSuccess = 0;
-				long lastFailed = 0;
 				long successDelta = 0;
+				long lastFailed = 0;
 				long failedDelta = 0;
+				long lastDropped = 0;
+				long droppedDelta = 0;
 				while (!Thread.interrupted()) {
 					synchronized (Simulation.class) {
 						successDelta = successfulRequests - lastSuccess;
 						failedDelta = failedRequests - lastFailed;
-						LOG.info("Success : " + String.format(NUMBER_FORMAT, successfulRequests) + " ("
-								+ String.format(DELTA_FORMAT, successDelta) + ") | Failed : " + String.format(NUMBER_FORMAT, failedRequests)
-								+ " (" + String.format(DELTA_FORMAT, failedDelta) + ") | Queued : "
-								+ String.format("%5d", executor.getQueue().size()) + " | Active : "
-								+ String.format("%5d", executor.getActiveCount()) + " | Dropped : "
-								+ String.format(NUMBER_FORMAT, droppedRequests));
+						droppedDelta = droppedRequests - lastDropped;
+						LOG.info("Success : " + String.format(NUMBER_FORMAT, successfulRequests) + " ("+ String.format(DELTA_FORMAT, successDelta)
+								+ ") | Failed : " + String.format(NUMBER_FORMAT, failedRequests) + " (" + String.format(DELTA_FORMAT, failedDelta)
+								+ ") | Queued : " + String.format("%5d", executor.getQueue().size())
+								+ " | Active : " + String.format("%5d", executor.getActiveCount())
+								+ " | Dropped : " + String.format(NUMBER_FORMAT, droppedRequests) + " ("+ String.format(DELTA_FORMAT, droppedDelta)+" )");
 						lastSuccess = successfulRequests;
 						lastFailed = failedRequests;
+						lastDropped = droppedRequests;
 						if (lastException != null) {
 							LOG.warn("Last Exception : " + lastException);
 							lastException = null;
@@ -120,10 +124,11 @@ public class Simulation implements InitializingBean, SimulationMBean {
 		// generate DB queries
 		while (!Thread.interrupted()) {
 			deviation = rand.nextGaussian() * simulationConfig.readProperty("responseTimeStandardDeviation", Double.class);
-			responseTime = simulationConfig.readProperty("responseTimeAverage", Double.class) + deviation;
+			final Double responseTimeAverage = simulationConfig.readProperty("responseTimeAverage", Double.class);
+			responseTime = responseTimeAverage + deviation;
 			// take out possible extreme values
 			if (responseTime < 0.00001 || responseTime > 10) {
-				responseTime = simulationConfig.readProperty("responseTimeAverage", Double.class);
+				responseTime = responseTimeAverage;
 			}
 
 			if (executor.getQueue().size() < simulationConfig.readProperty("dropRequestsThreshold", Integer.class)) {
@@ -134,8 +139,9 @@ public class Simulation implements InitializingBean, SimulationMBean {
 
 			double waitTime = expGen.nextValue();
 			try {
-				LOG.debug("Waiting " + waitTime + " seconds until next event.");
-				Thread.sleep(Math.round(waitTime * 1000));
+				final double waitTimeSeconds = waitTime * 1000;
+				LOG.debug("Waiting " + waitTimeSeconds + " seconds until next event.");
+				Thread.sleep(Math.round(waitTimeSeconds));
 			}
 			catch (InterruptedException e) {
 				LOG.info("Simulation thread interrupted, terminating...");
@@ -210,7 +216,7 @@ public class Simulation implements InitializingBean, SimulationMBean {
 
 	private void registerMbean() throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		ObjectName name = new ObjectName("pl.edux.pjwstk.it.platform.test.jdbc.pool:type=Simulation");
+		ObjectName name = new ObjectName("pl.edu.pja.master.s12621.test.jdbc.pool:type=Simulation");
 		mbs.registerMBean(this, name);
 	}
 

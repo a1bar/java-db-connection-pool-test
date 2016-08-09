@@ -19,10 +19,15 @@
 
 	<dependencies>
 		<!-- JDBC DRIVER -->
+		<!--<dependency>-->
+		    <!--<groupId>com.oracle</groupId>-->
+		    <!--<artifactId>ojdbc7</artifactId>-->
+		    <!--<version>12.1.0.1</version>-->
+		<!--</dependency>-->
 		<dependency>
-		    <groupId>com.oracle</groupId>
-		    <artifactId>ojdbc7</artifactId>
-		    <version>12.1.0.1</version>
+		<groupId>com.oracle</groupId>
+		<artifactId>ojdbc6</artifactId>
+		<version>11.2.0.4</version>
 		</dependency>
 		<!-- Connection pool implementations -->
 		<dependency>
@@ -55,16 +60,6 @@
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
 			<version>0.8.0.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladmihalcea.flexy-pool</groupId>
-			<artifactId>flexy-tomcatcp</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladmihalcea.flexy-pool</groupId>
-			<artifactId>flexy-dbcp2</artifactId>
-			<version>1.1.0</version>
 		</dependency>
 
 		<!-- For simulation purposes -->
