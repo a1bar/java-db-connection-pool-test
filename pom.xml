@@ -62,6 +62,12 @@
 			<groupId>org.uncommons.maths</groupId>
 			<artifactId>uncommons-maths</artifactId>
 			<version>${uncommons-math.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jfreechart</artifactId>
+					<groupId>jfree</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- for spring JavaConfig -->
