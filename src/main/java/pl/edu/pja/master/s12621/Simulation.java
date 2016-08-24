@@ -2,7 +2,6 @@ package pl.edu.pja.master.s12621;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.ExponentialGenerator;
@@ -26,7 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * Created by bartosz.drabik
  */
 
-public class Simulation implements InitializingBean, SimulationMBean {
+public class Simulation implements SimulationMBean {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Simulation.class);
 
@@ -45,6 +44,21 @@ public class Simulation implements InitializingBean, SimulationMBean {
 	@PostConstruct
 	private void postConstruct(){
 		this.simulationConfig.setPropertiesPath(Paths.get(configPropertiesFile));
+
+		NumberGenerator<Double> mean = new NumberGenerator<Double>() {
+			final Double requestsPerSecond = simulationConfig.readProperty("requestsPerSecond", Double.class);
+
+			public Double nextValue() {
+				return requestsPerSecond;
+			}
+		};
+		expGen = new ExponentialGenerator(mean, new Random());
+		try {
+			registerMbean();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		start();
 	}
 
 	private ExponentialGenerator expGen;
@@ -55,19 +69,6 @@ public class Simulation implements InitializingBean, SimulationMBean {
 	private volatile long failedRequests = 0;
 	private volatile long droppedRequests = 0;
 	private String lastException;
-
-	public void afterPropertiesSet() throws Exception {
-		NumberGenerator<Double> mean = new NumberGenerator<Double>() {
-			final Double requestsPerSecond = simulationConfig.readProperty("requestsPerSecond", Double.class);
-
-			public Double nextValue() {
-				return requestsPerSecond;
-			}
-		};
-		expGen = new ExponentialGenerator(mean, new Random());
-		registerMbean();
-		start();
-	}
 
 	private void start() {
 		LOG.info(String.format("Starting simulation with %s Data Source", connectionPool.getClass()));
@@ -126,7 +127,7 @@ public class Simulation implements InitializingBean, SimulationMBean {
 			final Double responseTimeAverage = simulationConfig.readProperty("responseTimeAverage", Double.class);
 			responseTime = responseTimeAverage + deviation;
 			// take out possible extreme values
-			if (responseTime < 0.00001 || responseTime > 10) {
+			if (responseTime < 0.0001 || responseTime > 10) {
 				responseTime = responseTimeAverage;
 			}
 
