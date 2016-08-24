@@ -38,4 +38,11 @@ public class SimulationConfigImpl implements SimulationConfig {
     public <T> T readProperty(String property, Class<T> clazz) {
         return ObjectConverter.convert(properties.getProperty(property),clazz);
     }
+
+    @Override
+    public String toString() {
+        return "SimulationConfigImpl{" +
+                "properties=" + properties +
+                '}';
+    }
 }

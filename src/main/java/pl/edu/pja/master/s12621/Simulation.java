@@ -58,6 +58,15 @@ public class Simulation implements SimulationMBean {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		final Integer simulationDelayInSeconds =  simulationConfig.readProperty("simulationDelayInSeconds", Integer.class);
+		LOG.info(String.format("Simulation will start in %s seconds with following configuration %s",simulationDelayInSeconds,simulationConfig));
+
+		LOG.info(String.format("Simulation will last for %s minutes", simulationConfig.readProperty("simulationTimeInMinutes", String.class)));
+		try {
+			Thread.sleep(simulationDelayInSeconds * 1000);
+		} catch (InterruptedException e) {
+			LOG.error("InterruptedException while waiting for the simulation to start");
+		}
 		start();
 	}
 
@@ -71,6 +80,8 @@ public class Simulation implements SimulationMBean {
 	private String lastException;
 
 	private void start() {
+		long currentSimulationTime = 0;
+		final long startTimeMillis = System.currentTimeMillis();
 		LOG.info(String.format("Starting simulation with %s Data Source", connectionPool.getClass()));
 
 		executor = new ScheduledThreadPoolExecutor(simulationConfig.readProperty("executorThreadPoolCoreSize", Integer.class), new RejectedExecutionHandler() {
@@ -122,7 +133,8 @@ public class Simulation implements SimulationMBean {
 		double responseTime;
 
 		// generate DB queries
-		while (!Thread.interrupted()) {
+		final long simulationTime = simulationConfig.readProperty("simulationTimeInMinutes", Long.class) * 60 * 1000;
+		while (!Thread.interrupted() && currentSimulationTime<simulationTime) {
 			deviation = rand.nextGaussian() * simulationConfig.readProperty("responseTimeStandardDeviation", Double.class);
 			final Double responseTimeAverage = simulationConfig.readProperty("responseTimeAverage", Double.class);
 			responseTime = responseTimeAverage + deviation;
@@ -147,6 +159,7 @@ public class Simulation implements SimulationMBean {
 				LOG.info("Simulation thread interrupted, terminating...");
 				return;
 			}
+			 currentSimulationTime = System.currentTimeMillis() - startTimeMillis;
 		}
 	}
 
